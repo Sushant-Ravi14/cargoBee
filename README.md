@@ -32,20 +32,22 @@ CargoBee is a full-stack, on-demand cargo booking platform that bridges the gap 
 ## 👥 User Roles
 
 ### 🛍️ Consumer
-- Register/Login via phone OTP or Google
-- Enter pickup and drop-off addresses with Google Maps autocomplete
-- Select vehicle type and cargo category (Boxes, Furniture, Electronics, Other)
-- View fare estimate and book instantly
-- Track driver in real time on a live map
-- Pay digitally and download PDF receipt
-- Rate the driver and view trip history
+- Register / Login via phone OTP or Google Login (Firebase)
+- Enter pickup and drop-off addresses with Google Maps Places Autocomplete
+- Select vehicle type (Mini Tempo, Pickup Truck, E-Cart) and cargo category (Boxes, Furniture, Electronics, Other)
+- View upfront fare estimate with full breakdown before confirming
+- Track assigned driver in real time on a live Google Map
+- Pay digitally via UPI / PhonePe / GPay through Razorpay and download a PDF receipt
+- Rate the driver using a star rating + tag chip system post-delivery
+- View full trip history with status filters (All / Completed / Cancelled)
 
 ### 🚛 Driver
-- Register and go Online/Offline with a toggle
-- Receive incoming booking alerts with a 60-second countdown to Accept or Decline
-- Navigate to pickup using the integrated map
-- Start and complete trips with photo upload confirmation
-- View real-time earnings, trip history, and performance stats on a dedicated dashboard
+- Register with vehicle details and Aadhar document upload via a 3-step multi-step form
+- Toggle Online / Offline status — state persisted in localStorage
+- Receive incoming booking alerts with a live 60-second countdown to Accept or Decline
+- Navigate to pickup location using the integrated Google Map
+- Upload a delivery photo to confirm cargo handover before completing the trip
+- View today's earnings, total distance, duty hours, rating, and recent trip history on a dedicated dashboard
 
 ---
 
@@ -53,18 +55,23 @@ CargoBee is a full-stack, on-demand cargo booking platform that bridges the gap 
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React.js |
-| **Backend** | Node.js + Express |
-| **Database** | MongoDB |
-| **Authentication** | Firebase / Google Login |
+| **Frontend Framework** | React.js (Vite) |
+| **UI Libraries** | Tailwind CSS + MUI (Material UI) |
+| **State Management** | Redux Toolkit |
+| **Routing** | React Router v6 |
+| **Forms & Validation** | Formik + Yup |
+| **HTTP Client** | Axios (with request/response interceptors) |
+| **Notifications** | React Hot Toast |
+| **SEO** | React Helmet Async |
+| **Backend** | Node.js + Express.js |
+| **Database** | MongoDB + Mongoose |
+| **Authentication** | Firebase (Phone OTP + Google Login) |
 | **Payments** | Razorpay |
-| **Maps** | Google Maps API |
+| **Maps & Autocomplete** | Google Maps API + Google Places API |
+| **Analytics** | Google Analytics (gtag.js) |
+| **Design** | [Figma Prototype](https://www.figma.com/proto/wDNO99XbxdTpCqD2XUk1JJ/Untitled?node-id=323-2018&p=f&viewport=18123%2C66%2C0.6&t=ZFzdPOK6sLKTwtSm-1&scaling=contain&content-scaling=fixed&starting-point-node-id=323%3A2018&page-id=0%3A1) |
 | **Deployment — Frontend** | Vercel |
 | **Deployment — Backend** | Render |
-
-### 🎨 Design (Figma Prototype)
-> View the full interactive prototype here:
-> [CargoBee Figma Prototype](https://www.figma.com/proto/wDNO99XbxdTpCqD2XUk1JJ/Untitled?node-id=323-2018&p=f&viewport=18123%2C66%2C0.6&t=ZFzdPOK6sLKTwtSm-1&scaling=contain&content-scaling=fixed&starting-point-node-id=323%3A2018&page-id=0%3A1)
 
 ---
 
@@ -72,41 +79,110 @@ CargoBee is a full-stack, on-demand cargo booking platform that bridges the gap 
 
 ```
 cargobee/
-├── frontend/                      # React.js Frontend
-│   ├── public/
+├── frontend/                            # React.js (Vite) Frontend
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js               # Custom color palette + darkMode: 'class'
+│   ├── postcss.config.js
+│   ├── .env
 │   └── src/
-│       ├── assets/                # Images, icons, logos
-│       ├── components/            # Reusable UI components
-│       │   ├── Navbar.jsx
-│       │   ├── VehicleCard.jsx
-│       │   ├── MapView.jsx
-│       │   ├── DriverCard.jsx
-│       │   └── RatingWidget.jsx
+│       ├── main.jsx                     # Entry point — Redux Provider, MUI ThemeProvider,
+│       │                                # HelmetProvider, Toaster, ErrorBoundary
+│       ├── App.jsx                      # Root router with all lazy-loaded routes
+│       ├── assets/                      # Logos, images, bee SVG icon
+│       │
+│       ├── components/                  # Reusable UI components
+│       │   ├── ui/
+│       │   │   ├── Button.jsx           # Primary / outline / ghost / icon variants
+│       │   │   ├── Input.jsx            # With label, error message, icon prefix support
+│       │   │   ├── Modal.jsx            # Accessible overlay modal with focus trap
+│       │   │   ├── Badge.jsx            # Status badges (Completed, Cancelled, Active)
+│       │   │   ├── Spinner.jsx          # Loading spinner used as Suspense fallback
+│       │   │   ├── Avatar.jsx           # User/driver avatar with fallback initials
+│       │   │   ├── Card.jsx             # Base card with shadow + rounded corners
+│       │   │   └── Toast.jsx            # React Hot Toast config wrapper
+│       │   ├── layout/
+│       │   │   ├── Navbar.jsx           # Consumer top navbar — tabs + theme toggle
+│       │   │   ├── Sidebar.jsx          # Driver dashboard left sidebar (dark)
+│       │   │   ├── BottomNav.jsx        # Consumer mobile bottom navigation bar
+│       │   │   └── PageWrapper.jsx      # SEO helmet + consistent page padding
+│       │   ├── map/
+│       │   │   ├── MapView.jsx          # Google Maps embed component
+│       │   │   └── AddressInput.jsx     # Google Places Autocomplete input field
+│       │   ├── booking/
+│       │   │   ├── VehicleCard.jsx      # Selectable vehicle type card with price
+│       │   │   ├── CargoTypeSelector.jsx # Multi-select cargo category chip row
+│       │   │   └── FareBreakdown.jsx    # Itemised fare estimate display
+│       │   ├── driver/
+│       │   │   ├── DriverCard.jsx       # Driver info (photo, name, rating, vehicle)
+│       │   │   └── TripRequestAlert.jsx # Incoming booking modal with 60s countdown
+│       │   ├── upload/
+│       │   │   └── FileUpload.jsx       # Drag & drop upload with preview + validation
+│       │   └── ErrorBoundary.jsx        # Global error boundary class component
+│       │
 │       ├── pages/
-│       │   ├── SplashScreen.jsx
-│       │   ├── Onboarding.jsx
-│       │   ├── Login.jsx
-│       │   ├── Register.jsx
-│       │   ├── Home.jsx           # Booking screen
-│       │   ├── AddressSearch.jsx
-│       │   ├── DriverMatching.jsx
-│       │   ├── DriverConfirmed.jsx
-│       │   ├── LiveTracking.jsx
-│       │   ├── TripCompletion.jsx
-│       │   ├── RateExperience.jsx
-│       │   ├── TripHistory.jsx
+│       │   ├── SplashScreen.jsx         # Auto-transitions to Onboarding after 2.5s
+│       │   ├── Onboarding.jsx           # 3-slide carousel with swipe gesture support
+│       │   ├── NotFound.jsx             # 404 page with home link
+│       │   ├── auth/
+│       │   │   ├── Login.jsx            # Phone OTP + Google login, consumer/driver toggle
+│       │   │   └── Register.jsx         # 3-step form with sessionStorage progress saving
+│       │   ├── consumer/
+│       │   │   ├── Home.jsx             # Booking screen — map + vehicle + fare + Book Now
+│       │   │   ├── AddressSearch.jsx    # Places autocomplete overlay with recent searches
+│       │   │   ├── DriverMatching.jsx   # Animated search screen, 3s auto-transition
+│       │   │   ├── DriverConfirmed.jsx  # Driver details + call/message + Track Live
+│       │   │   ├── LiveTracking.jsx     # Live map with driver ETA and route line
+│       │   │   ├── TripCompletion.jsx   # Fare receipt + payment method + Pay via UPI
+│       │   │   ├── RateExperience.jsx   # Stars + tag chips + comment + Submit Rating
+│       │   │   └── TripHistory.jsx      # Filterable trip list with detail modal
 │       │   └── driver/
-│       │       └── DriverDashboard.jsx
-│       ├── context/               # Global state (Auth, Booking)
-│       ├── hooks/                 # Custom React hooks
-│       ├── services/              # API call functions
-│       ├── App.jsx
-│       └── main.jsx
+│       │       ├── DriverDashboard.jsx  # Earnings stats + new request card + trip table
+│       │       └── DriverActiveTrip.jsx # Live map + delivery photo upload + Complete Trip
+│       │
+│       ├── features/                    # Redux Toolkit slices (feature-based architecture)
+│       │   ├── auth/
+│       │   │   └── authSlice.js         # { user, token, isAuthenticated, loading, error }
+│       │   ├── booking/
+│       │   │   └── bookingSlice.js      # { pickup, drop, vehicle, cargoTypes, fare, status }
+│       │   ├── driver/
+│       │   │   └── driverSlice.js       # { isOnline, currentTrip, earnings, pendingRequest }
+│       │   ├── trip/
+│       │   │   └── tripSlice.js         # { trips[], currentTrip, loading, error }
+│       │   └── ui/
+│       │       └── uiSlice.js           # { theme, globalLoading, toast }
+│       │
+│       ├── hooks/                       # Custom reusable React hooks
+│       │   ├── useAuth.js               # user, isAuthenticated, role, login, logout
+│       │   ├── useDebounce.js           # Debounce a value by delay (300ms for Places API)
+│       │   ├── useTheme.js              # theme, toggleTheme — synced with localStorage
+│       │   ├── useFetch.js              # { data, loading, error, execute } wrapper
+│       │   └── useLocalStorage.js       # [value, setValue] with JSON parse/stringify
+│       │
+│       ├── services/                    # Axios API abstraction layer
+│       │   ├── api.js                   # Axios instance + request/response interceptors
+│       │   ├── authService.js           # loginWithPhone, verifyOTP, loginWithGoogle, logout
+│       │   ├── bookingService.js        # createBooking, cancelBooking, getFareEstimate
+│       │   ├── driverService.js         # toggleStatus, acceptRequest, declineRequest, getDashboard
+│       │   ├── tripService.js           # getTrips, getTripById, startTrip, completeTrip, rateTrip
+│       │   └── paymentService.js        # createOrder, verifyPayment, getReceipt
+│       │
+│       ├── store/
+│       │   └── store.js                 # Redux store — all slices registered here
+│       │
+│       └── utils/
+│           ├── storage.js               # localStorage + sessionStorage helper functions
+│           ├── fareCalculator.js        # Base fare + distance charge + surcharge + GST
+│           ├── formatters.js            # Currency (₹), date, distance formatters
+│           └── validators.js            # Shared Yup schemas and Indian phone regex
 │
-├── backend/                       # Node.js + Express Backend
+├── backend/                             # Node.js + Express Backend
+│   ├── server.js                        # App setup, middleware, route mounting, error handler
+│   ├── .env
+│   ├── package.json
 │   ├── config/
-│   │   ├── db.js                  # MongoDB connection
-│   │   └── firebase.js            # Firebase admin setup
+│   │   ├── db.js                        # Mongoose MongoDB connection
+│   │   └── firebase.js                  # Firebase Admin SDK initialisation
 │   ├── controllers/
 │   │   ├── authController.js
 │   │   ├── bookingController.js
@@ -114,24 +190,21 @@ cargobee/
 │   │   ├── tripController.js
 │   │   └── paymentController.js
 │   ├── middleware/
-│   │   ├── authMiddleware.js      # Firebase token verification
-│   │   └── errorHandler.js
+│   │   ├── authMiddleware.js            # Firebase JWT verification on protected routes
+│   │   └── errorHandler.js             # Global Express error handler
 │   ├── models/
-│   │   ├── User.js
-│   │   ├── Driver.js
-│   │   ├── Booking.js
-│   │   └── Trip.js
+│   │   ├── User.js                      # name, phone, email, role, firebaseUid, isVerified
+│   │   ├── Driver.js                    # vehicleType, vehicleNumber, isOnline, rating, earnings
+│   │   ├── Booking.js                   # pickup, drop, vehicle, fareBreakdown, status
+│   │   └── Trip.js                      # startTime, endTime, distance, rating, paymentStatus
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── bookingRoutes.js
 │   │   ├── driverRoutes.js
 │   │   ├── tripRoutes.js
 │   │   └── paymentRoutes.js
-│   ├── utils/
-│   │   └── fareCalculator.js
-│   ├── .env
-│   ├── server.js
-│   └── package.json
+│   └── utils/
+│       └── fareCalculator.js            # Shared fare logic used by bookingController
 │
 ├── .gitignore
 └── README.md
@@ -143,57 +216,56 @@ cargobee/
 
 ### Auth Routes — `/api/auth`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/login` | Login with Firebase ID token |
-| `POST` | `/api/auth/register` | Register new user (consumer or driver) |
-| `GET` | `/api/auth/me` | Get current logged-in user profile |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/api/auth/login` | Login with Firebase ID token | ❌ |
+| `POST` | `/api/auth/register` | Register new user — consumer or driver | ❌ |
+| `GET` | `/api/auth/me` | Get current logged-in user profile | ✅ |
 
 ### Booking Routes — `/api/bookings`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/bookings/create` | Create a new booking request |
-| `GET` | `/api/bookings/:id` | Get booking details by ID |
-| `PUT` | `/api/bookings/:id/cancel` | Cancel a booking |
-| `GET` | `/api/bookings/fare-estimate` | Get fare estimate (pickup, drop, vehicle type) |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/api/bookings/create` | Create a new booking request | ✅ |
+| `GET` | `/api/bookings/fare-estimate` | Get fare estimate by pickup, drop, vehicle type | ✅ |
+| `GET` | `/api/bookings/:id` | Get booking details by ID | ✅ |
+| `PUT` | `/api/bookings/:id/cancel` | Cancel an existing booking | ✅ |
 
 ### Driver Routes — `/api/drivers`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/drivers/nearby` | Get nearby available drivers |
-| `PUT` | `/api/drivers/status` | Toggle driver online/offline status |
-| `POST` | `/api/drivers/accept/:bookingId` | Driver accepts a booking request |
-| `POST` | `/api/drivers/decline/:bookingId` | Driver declines a booking request |
-| `GET` | `/api/drivers/dashboard` | Get driver's dashboard stats and earnings |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `GET` | `/api/drivers/nearby` | Get list of nearby available online drivers | ✅ |
+| `GET` | `/api/drivers/dashboard` | Get driver dashboard stats and earnings summary | ✅ |
+| `PUT` | `/api/drivers/status` | Toggle driver online / offline status | ✅ |
+| `POST` | `/api/drivers/accept/:bookingId` | Driver accepts an incoming booking request | ✅ |
+| `POST` | `/api/drivers/decline/:bookingId` | Driver declines an incoming booking request | ✅ |
 
 ### Trip Routes — `/api/trips`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/trips` | Get all trips for the logged-in user |
-| `GET` | `/api/trips/:id` | Get single trip detail |
-| `PUT` | `/api/trips/:id/start` | Driver starts the trip |
-| `PUT` | `/api/trips/:id/complete` | Driver marks the trip as complete |
-| `POST` | `/api/trips/:id/rate` | Consumer submits a trip rating |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `GET` | `/api/trips` | Get all trips for the logged-in user | ✅ |
+| `GET` | `/api/trips/:id` | Get single trip detail by ID | ✅ |
+| `PUT` | `/api/trips/:id/start` | Driver starts the trip | ✅ |
+| `PUT` | `/api/trips/:id/complete` | Driver marks trip complete with delivery photo | ✅ |
+| `POST` | `/api/trips/:id/rate` | Consumer submits star rating, tags, and comment | ✅ |
 
 ### Payment Routes — `/api/payments`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/payments/create-order` | Create Razorpay payment order |
-| `POST` | `/api/payments/verify` | Verify Razorpay payment signature |
-| `GET` | `/api/payments/receipt/:tripId` | Download PDF receipt for a completed trip |
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/api/payments/create-order` | Create a Razorpay payment order | ✅ |
+| `POST` | `/api/payments/verify` | Verify Razorpay HMAC signature and mark trip paid | ✅ |
+| `GET` | `/api/payments/receipt/:tripId` | Download PDF receipt for a completed trip | ✅ |
 
 ---
 
 ## 🚀 Steps to Run the Project Locally
 
 ### Prerequisites
-Make sure you have the following installed:
-- [Node.js](https://nodejs.org/) (v18+)
-- [MongoDB](https://www.mongodb.com/) (local or Atlas URI)
+- [Node.js](https://nodejs.org/) v18+
+- [MongoDB](https://www.mongodb.com/) — local instance or Atlas URI
 - [Git](https://git-scm.com/)
 
 ---
@@ -214,15 +286,16 @@ cd backend
 npm install
 ```
 
-Create a `.env` file inside `/backend` with the following variables:
+Create a `.env` file inside `/backend`:
 
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
+CLIENT_URL=http://localhost:5173
 
 FIREBASE_PROJECT_ID=your_firebase_project_id
 FIREBASE_CLIENT_EMAIL=your_firebase_client_email
-FIREBASE_PRIVATE_KEY=your_firebase_private_key
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
@@ -236,7 +309,7 @@ Start the backend server:
 npm run dev
 ```
 
-> Server will run at `http://localhost:5000`
+> Server runs at `http://localhost:5000`
 
 ---
 
@@ -247,7 +320,7 @@ cd ../frontend
 npm install
 ```
 
-Create a `.env` file inside `/frontend` with the following variables:
+Create a `.env` file inside `/frontend`:
 
 ```env
 VITE_API_URL=http://localhost:5000
@@ -256,6 +329,7 @@ VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
 VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
 Start the frontend development server:
@@ -264,13 +338,18 @@ Start the frontend development server:
 npm run dev
 ```
 
-> App will run at `http://localhost:5173`
+> App runs at `http://localhost:5173`
 
 ---
 
 ### 4. Open in Browser
 
-Visit `http://localhost:5173` and you should see the CargoBee Splash Screen. 🎉
+Visit `http://localhost:5173` — you will land on the CargoBee Splash Screen. 🎉
+
+The app runs in **demo / simulation mode** by default:
+- Driver matching simulates a 3-second search and then auto-assigns a mock driver
+- Live tracking simulates movement and auto-completes after 3 seconds
+- The payment flow shows a success animation without a real Razorpay charge unless API keys are fully configured
 
 ---
 
