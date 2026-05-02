@@ -16,6 +16,7 @@ const LiveTracking = lazy(() => import('./pages/LiveTracking'));
 const TripCompletion = lazy(() => import('./pages/TripCompletion'));
 const RateExperience = lazy(() => import('./pages/RateExperience'));
 const Trips = lazy(() => import('./pages/Trips'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 const LoadingScreen = () => (
   <div className="h-screen w-screen flex items-center justify-center bg-background">
@@ -64,13 +65,9 @@ const App = () => {
           <Route path="/trip-completion" element={<TripCompletion />} />
           <Route path="/rate-experience" element={<RateExperience />} />
           <Route path="/trips" element={<Trips />} />
+          <Route path="/profile" element={<Profile />} />
 
-          {/* Placeholders for upcoming pages */}
-          <Route path="/profile" element={
-            <div className="min-h-screen flex items-center justify-center bg-background">
-              <h1 className="text-2xl font-bold text-accent">Profile (Coming in next chunk)</h1>
-            </div>
-          } />
+          {/* Placeholders for upcoming driver pages */}
           <Route path="/driver/dashboard" element={
             <div className="min-h-screen flex items-center justify-center bg-background">
               <h1 className="text-2xl font-bold text-accent">Driver Dashboard (Coming in later chunk)</h1>
