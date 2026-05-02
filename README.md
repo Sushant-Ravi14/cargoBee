@@ -2,6 +2,18 @@
 
 ---
 
+## 🔗 Quick Links
+
+| Resource | Link |
+|---|---|
+| 🎨 **Figma Design Prototype** | [View Prototype](https://www.figma.com/proto/wDNO99XbxdTpCqD2XUk1JJ/Untitled?node-id=323-2018&p=f&viewport=18123%2C66%2C0.6&t=ZFzdPOK6sLKTwtSm-1&scaling=contain&content-scaling=fixed&starting-point-node-id=323%3A2018&page-id=0%3A1) |
+| 🚀 **Live Deployed Project** | [cargobee.vercel.app](https://cargobee.vercel.app/splash) |
+| 📬 **Postman API Documentation** | [View Docs](https://documenter.getpostman.com/view/50841146/2sBXqKof5e) |
+| 🖥️ **Backend Deployed URL** | [cargobee-bwbh.onrender.com](https://cargobee-bwbh.onrender.com) |
+| ▶️ **YouTube Demo** | [Watch Demo](https://youtu.be/rYizT_0HwOg) |
+
+---
+
 ## 📌 The Problem Statement
 
 Booking cargo vehicles for everyday consumers remains a frustratingly broken experience compared to passenger transport:
