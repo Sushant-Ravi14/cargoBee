@@ -1,0 +1,13 @@
+/**
+ * Global Express error handler middleware
+ * Extracted from server.js to match the target folder spec
+ */
+const errorHandler = (err, req, res, next) => {
+  console.error('Unhandled Error:', err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+  });
+};
+
+module.exports = { errorHandler };
